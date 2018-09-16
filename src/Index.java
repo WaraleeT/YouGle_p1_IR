@@ -38,11 +38,7 @@ public class Index {
 		= new TreeMap<String, Integer>();
 	// Block queue
 	private static LinkedList<File> blockQueue
-		= new LinkedList<File>();
-	//Added: Term PostingList
-	private static Map<Integer, ArrayList<Integer>> posting
-		= new TreeMap<Integer, ArrayList<Integer>>();
-	
+		= new LinkedList<File>();	
 
 	// Total file counter
 	private static int totalFileCount = 0;
@@ -151,13 +147,12 @@ public class Index {
 		}
 		
 		
-		
-		
 		/* BSBI indexing algorithm */
 		File[] dirlist = rootdir.listFiles();
 
 		/* For each block */
 		for (File block : dirlist) {
+			System.out.println(block.getName());
 			File blockFile = new File(outputDirname, block.getName());
 			//System.out.println("Processing block "+block.getName());
 			blockQueue.add(blockFile);
@@ -165,6 +160,8 @@ public class Index {
 			File blockDir = new File(dataDirname, block.getName());
 			File[] filelist = blockDir.listFiles();
 			
+			//Added: Term PostingList
+			Map<Integer, ArrayList<Integer>> posting = new TreeMap<Integer, ArrayList<Integer>>();
 			
 			/* For each file */
 			for (File file : filelist) {
@@ -191,14 +188,14 @@ public class Index {
 							termDict.put(token, termId);
 							ArrayList<Integer> tempList = new ArrayList<>();
 							posting.put(termId, tempList);
-							System.out.println(token);
+//							System.out.println(token);
+							posting.get(termId).add(docId);
+						}else{
+							int tempId = termDict.get(token);
+							if(posting.get(tempId)!=null&&!posting.get(tempId).contains(docId)){
+								posting.get(tempId).add(docId);
+							}
 						}
-						
-						int tempId = termDict.get(token);
-						if(!posting.get(tempId).contains(docId)){
-							posting.get(tempId).add(docId);
-						}
-						
 					}
 				}
 				reader.close();
@@ -226,19 +223,19 @@ public class Index {
 			
 			for(int keyId : posting.keySet()){
 				writePosting(bfc.getChannel(), new PostingList(keyId, posting.get(keyId)));
-				String docnum = "";
-				for(int number: posting.get(keyId)){
-					docnum += number;
-				}
-				long number = new Long(docnum).longValue();
-				Pair tempPair = new Pair(number,posting.get(keyId).size());
-				postingDict.put(keyId, tempPair);
+//				String docnum = "";
+//				for(int number: posting.get(keyId)){
+//					docnum += number;
+//				}
+//				long number = new Long(docnum).longValue();
+//				Pair tempPair = new Pair(number,posting.get(keyId).size());
+//				postingDict.put(keyId, tempPair);
 			}
 			bfc.close();
 		}
 
 		/* Required: output total number of files. */
-		//System.out.println("Total Files Indexed: "+totalFileCount);
+		System.out.println("Total Files Indexed: "+totalFileCount);
 
 		/* Merge blocks */
 		while (true) {
@@ -265,7 +262,6 @@ public class Index {
 			 *       the two blocks (based on term ID, perhaps?).
 			 *       
 			 */
-			
 			
 			
 			bf1.close();
