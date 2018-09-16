@@ -193,11 +193,17 @@ public class Index {
 							termDict.put(token, termId);
 							ArrayList<Integer> tempList = new ArrayList<>();
 							posting.put(termId, tempList);
-//							System.out.println(token);
 							posting.get(termId).add(docId);
 						}else{
 							int tempId = termDict.get(token);
-							if(posting.get(tempId)!=null&&!posting.get(tempId).contains(docId)){
+							if(posting.get(tempId)!=null ){
+								if(!posting.get(tempId).contains(docId)){
+									posting.get(tempId).add(docId);
+								}
+							}
+							else{
+								ArrayList<Integer> tempList = new ArrayList<>();
+								posting.put(tempId, tempList);
 								posting.get(tempId).add(docId);
 							}
 						}
@@ -205,7 +211,7 @@ public class Index {
 				}
 				reader.close();
 			}
-
+			
 			/* Sort and output */
 			if (!blockFile.createNewFile()) {
 				System.err.println("Create new block failure.");
@@ -217,7 +223,7 @@ public class Index {
 			 * TODO: Your code here
 			 *       Write all posting lists for all terms to file (bfc) 
 			 */
-			
+			System.out.println(posting.keySet().toString());
 			for(int keyId : posting.keySet()){
 				writePosting(bfc.getChannel(), new PostingList(keyId, posting.get(keyId)));
 //				String docnum = "";
@@ -265,13 +271,13 @@ public class Index {
 //	         if(first1 == first2){
 //	        	 
 //	         }
-			final int EOF = -1;
-			int i = 0;
-			while(bf2.readInt() != EOF){
-				i++;
-			    System.out.print(","+bf2.readInt());
-			}
-			System.out.println();
+//			final int EOF = -1;
+//			int i = 0;
+//			while(bf2.readInt() != EOF){
+//				i++;
+//			    System.out.print(","+bf2.readInt());
+//			}
+//			System.out.println();
 			
 			bf1.close();
 			bf2.close();
