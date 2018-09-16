@@ -2,6 +2,7 @@
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -65,10 +66,14 @@ public class Index {
 		ByteBuffer buf = ByteBuffer.allocate(INT_BYTES*(posting.getList().size()+2)); 
 		buf.putInt(posting.getTermId()); 
 		buf.putInt(posting.getList().size()); 
+		String docBuf = "";
 		for (int docID : posting.getList()){ 
 			buf.putInt(docID); 
+			docBuf += docID;
 		} 
+		System.out.println(posting.getTermId()+","+posting.getList().size()+","+docBuf);
 		buf.flip(); 
+		
 		fc.write(buf);
 	}
 	
@@ -152,7 +157,7 @@ public class Index {
 
 		/* For each block */
 		for (File block : dirlist) {
-			System.out.println(block.getName());
+//			System.out.println(block.getName());
 			File blockFile = new File(outputDirname, block.getName());
 			//System.out.println("Processing block "+block.getName());
 			blockQueue.add(blockFile);
@@ -200,14 +205,6 @@ public class Index {
 				}
 				reader.close();
 			}
-			
-//			for(ArrayList<Integer> e : posting.values()){
-//					for(int i : e){
-//						System.out.print(i+",");
-//					}
-//					System.out.println();
-//			}
-			
 
 			/* Sort and output */
 			if (!blockFile.createNewFile()) {
@@ -262,7 +259,19 @@ public class Index {
 			 *       the two blocks (based on term ID, perhaps?).
 			 *       
 			 */
-			
+			// create an array equal to the length of raf
+//	         int first1 = 0;
+//	         int first2 = 0;
+//	         if(first1 == first2){
+//	        	 
+//	         }
+			final int EOF = -1;
+			int i = 0;
+			while(bf2.readInt() != EOF){
+				i++;
+			    System.out.print(","+bf2.readInt());
+			}
+			System.out.println();
 			
 			bf1.close();
 			bf2.close();
