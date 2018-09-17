@@ -70,7 +70,7 @@ public class Index {
 			buf.putInt(docID);
 			docBuf += docID;
 		}
-//		System.out.println(posting.getTermId()+","+posting.getList().size()+","+docBuf);
+		System.out.println(posting.getTermId()+","+posting.getList().size()+","+docBuf);
 		buf.flip();
 
 		fc.write(buf);
@@ -236,12 +236,15 @@ public class Index {
 		System.out.println("Total Files Indexed: "+totalFileCount);
 
 		/* Merge blocks */
-//		while (true) {
-//			if (blockQueue.size() <= 1)
-//				break;
+		while (true) {
+			if (blockQueue.size() <= 1)
+				break;
 
 			File b1 = blockQueue.removeFirst();
 			File b2 = blockQueue.removeFirst();
+			
+			System.out.println(b1.getName());
+			System.out.println(b2.getName());
 			
 			File combfile = new File(outputDirname, b1.getName() + "+" + b2.getName());
 			if (!combfile.createNewFile()) {
@@ -275,7 +278,7 @@ public class Index {
 //			b1.delete();
 //			b2.delete();
 			blockQueue.add(combfile);
-//		}
+		}
 
 		/* Dump constructed index back into file system */
 		File indexFile = blockQueue.removeFirst();
@@ -328,106 +331,120 @@ public class Index {
 		FileChannel ch2 = bf2.getChannel();
 		FileChannel mfchannel = mf.getChannel();
 		
+		
 		ByteBuffer buf = ByteBuffer.allocate((int) (INT_BYTES*(ch1.size()+ch2.size())));
 		//open file channel
-        int countbyte = 0;
         int i = 0; // index of each number
         int j = 0;
-        int len2 = 0;
-        int len;
         IntBuffer ib = ch1.map(FileChannel.MapMode.READ_ONLY, 0, ch1.size()).asIntBuffer();
         IntBuffer ib2 = ch2.map(FileChannel.MapMode.READ_ONLY, 0, ch2.size()).asIntBuffer();
         try
         {	
             while(i < ch1.size()&&j<ch2.size())
             {	
+            	
 				int termid = ib.get(i);
-				int termid2 = ib.get(j);
-				i++;
-				j++;
-				int docfreq = ib.get(i);
-				int docfreq2 = ib.get(j);
-				i++;
-				j++;
+				int termid2 = ib2.get(j);
+				System.out.println("Compare "+termid+"  and  "+termid2);
+//				i++;
+//				j++;
+				int docfreq = ib.get(i+1);
+				int docfreq2 = ib2.get(j+1);
+//				i++;
+//				j++;
 				//combine into one and put into file
 				if(termid == termid2){
 					buf.putInt(termid);		//Add term ID to buffer
-					System.out.print("TermID: "+termid+",");
+					i++;
+					j++;
+					System.out.println("Add Term ID: "+termid+" from file 1");
+					i++;
+					j++;
 					int limit1 = i+docfreq;
 					int limit2 = j+docfreq2;
 					int totalFreq = docfreq+docfreq2;
 					buf.putInt(totalFreq);	//Add docFreq to buffer
-					System.out.print("Freq: "+totalFreq+",");
+					
+					System.out.println("Add Freq: "+totalFreq);
 					//Merge Doc ID 
+					System.out.print("DocID:");
 					while(i<limit1&&j<limit2){
 						if(ib.get(i) < ib2.get(j)){
-							System.out.print(ib.get(i)+",");
 							buf.putInt(ib.get(i));	//Add docID
+							System.out.println("Add Doc ID: "+ib.get(i)+" from file 1");
 							i++;
 						}
 						else if(ib.get(i) > ib2.get(j)){
-							System.out.print(ib2.get(j)+",");
 							buf.putInt(ib2.get(j));	//Add docID
+							System.out.println("Add Doc ID: "+ib2.get(j)+" from file 2");
 							j++;
 						}
 						else{ //equal
-							System.out.print(ib.get(i)+",");
 							buf.putInt(ib.get(i));	//Add docID
+							System.out.println("Add Doc ID: "+ib.get(i));
 							i++;
 							j++;
 						}
 					}
 					while(i<limit1){
-						System.out.print(ib.get(i)+",");
 						buf.putInt(ib.get(i));
+						System.out.println("Add Remain1: "+ib.get(i));
 						i++;
 					}
 					while(j<limit2){
-						System.out.print(ib2.get(j)+",");
 						buf.putInt(ib2.get(j));
+						System.out.println("Add Remain2: "+ib2.get(j));
 						j++;
 					}
 				}
 				else if(termid < termid2){
 					buf.putInt(termid);
+					i++;
 					buf.putInt(docfreq);
-					System.out.print("Term: "+termid+", Freq: "+docfreq+",");
-					while(i<i+docfreq)
-					{
-						System.out.print(ib.get(i)+",");
+					i++;
+					System.out.println("Add Term ID: "+termid+" from file 1");
+					System.out.println("Add Freq: "+docfreq+" from file 1");
+					int len = i+docfreq;
+					while(i<len)
+					{	
 						buf.putInt(ib.get(i));
+						System.out.println("Add Doc ID: "+ib.get(i));
 						i++;
 					}
 					
 				}
 				else{ //termid < termid2
 					buf.putInt(termid2);
+					j++;
 					buf.putInt(docfreq2);
-					System.out.print("Term: "+termid+", Freq: "+docfreq+",");
-					while(j<j+docfreq2)
+					j++;
+					System.out.println("Add Term ID: "+termid+" from file 2");
+					System.out.println("Add Freq: "+docfreq2+" from file2");
+					int len = j+docfreq2;
+					while(j<len)
 					{	
-						System.out.print(ib2.get(j)+",");
 						buf.putInt(ib2.get(j));
+						System.out.println("Add Doc ID: "+ib2.get(j));
 						j++;
 					}
 				}
-				
+				System.out.println("----------------------Round Check: "+i+"  "+j);
             }
             
             //Add remain data in file
             while(i < ch1.size()){
             	buf.putInt(ib.get(i));
-            	System.out.print(ib.get(i)+",");
+            	System.out.println("Add Remain from file1: "+ib.get(i));
 				i++;
             }
             while(j < ch2.size()){
             	buf.putInt(ib2.get(j));
-            	System.out.print(ib2.get(j)+",");
+            	System.out.println("Add Remain from file 2: "+ib2.get(j));
 				j++;
             }
         }
         catch(Exception e)
-        {
+        {	
             System.out.println("reading done\n");
         }
         buf.flip();
