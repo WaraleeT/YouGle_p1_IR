@@ -43,6 +43,9 @@ public class Query {
 		/*
 		 * TODO: Your code here
 		 */
+		
+		
+		
 		return null;
 	}
 	

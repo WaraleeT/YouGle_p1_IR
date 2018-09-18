@@ -275,8 +275,8 @@ public class Index {
 			bf1.close();
 			bf2.close();
 			mf.close();
-//			b1.delete();
-//			b2.delete();
+			b1.delete();
+			b2.delete();
 			blockQueue.add(combfile);
 		}
 
@@ -286,36 +286,31 @@ public class Index {
 
 		// modify postingDict( Map<Integer, Pair<Long, Integer>> postingDict)
 		// by reading corpus.index
+        RandomAccessFile indexf = new RandomAccessFile(new File(outputDirname+"/corpus.index"), "r");
         
         //open file channel
-//        int countbyte = 0;
-//        int i = 0; // index of each number
-//        int len;
-//        FileChannel fc = raf.getChannel();
-//        IntBuffer ib = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
-//        System.out.println("Size: "+fc.size());
-//        try
-//        {
-//            while(true)
-//            {
-//				int termid = ib.get(i);
-//				i++;
-//				int docfreq = ib.get(i);
-//				i++;
-//				System.out.println("term id = " + termid + " doclen = " + docfreq);
-//				System.out.print("posting list: ");
-//				for(len = i; len < i+docfreq; len++)
-//				{
-//					System.out.print(ib.get(len) + " ");
-//				}
-//				System.out.println("\n");
-//				i+=docfreq;
-//            }
-//        }
-//        catch(Exception e)
-//        {
-//            System.out.println("reading done\n");
-//        }
+        int i = 0; // index of each numbers
+        FileChannel fc = indexf.getChannel();
+        IntBuffer indexbuffer = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()).asIntBuffer();
+        try
+        {
+            while(true)
+            {
+				int termid = indexbuffer.get(i);
+				int pos = i;
+				i++;
+				int docfreq = indexbuffer.get(i);
+				i++;
+				Pair tempPair = new Pair<Long,Integer>((long) (pos*4), docfreq);
+				System.out.println(termid+"  "+(pos*4)+"  "+docfreq);
+				i+=docfreq;
+				postingDict.put(termid, tempPair);
+            }
+        }
+        catch(Exception e)
+        {
+            System.out.println("reading done\n");
+        }
 		
 		
 		

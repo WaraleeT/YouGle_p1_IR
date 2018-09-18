@@ -120,23 +120,23 @@ public class P1Tester {
 				e.printStackTrace();
 			}
 			String output = queryService.outputQueryResult(hitDocs);
-			try {
-				File file = new File(outputDir, (i+1)+".out");
-	
-				// if file doesnt exists, then create it
-				if (!file.exists()) {
-					file.createNewFile();
-				}
-				
-				FileWriter fw = new FileWriter(file.getAbsoluteFile());
-				BufferedWriter bw = new BufferedWriter(fw);
-			
-				bw.write(output);
-				bw.close();
-			} catch (IOException e) {
-				
-				e.printStackTrace();
-			}
+//			try {
+//				File file = new File(outputDir, (i+1)+".out");
+//	
+//				// if file doesnt exists, then create it
+//				if (!file.exists()) {
+//					file.createNewFile();
+//				}
+//				
+//				FileWriter fw = new FileWriter(file.getAbsoluteFile());
+//				BufferedWriter bw = new BufferedWriter(fw);
+//			
+//				bw.write(output);
+//				bw.close();
+//			} catch (IOException e) {
+//				
+//				e.printStackTrace();
+//			}
 			
 		}
 		long memoryAfter = Runtime.getRuntime().totalMemory()- Runtime.getRuntime().freeMemory();
@@ -173,7 +173,7 @@ public class P1Tester {
 	{
 		//Test the "small" dataset
 		testIndex("Basic", "./datasets/small", "./index/small");
-//		testQuery("Basic", "./index/small", queriesSmall, "./output/small");
+		testQuery("Basic", "./index/small", queriesSmall, "./output/small");
 		
 		//Test the "large" dataset
 		//testIndex("Basic", "./datasets/large", "./index/large");
