@@ -286,6 +286,39 @@ public class Index {
 
 		// modify postingDict( Map<Integer, Pair<Long, Integer>> postingDict)
 		// by reading corpus.index
+        
+        //open file channel
+//        int countbyte = 0;
+//        int i = 0; // index of each number
+//        int len;
+//        FileChannel fc = raf.getChannel();
+//        IntBuffer ib = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
+//        System.out.println("Size: "+fc.size());
+//        try
+//        {
+//            while(true)
+//            {
+//				int termid = ib.get(i);
+//				i++;
+//				int docfreq = ib.get(i);
+//				i++;
+//				System.out.println("term id = " + termid + " doclen = " + docfreq);
+//				System.out.print("posting list: ");
+//				for(len = i; len < i+docfreq; len++)
+//				{
+//					System.out.print(ib.get(len) + " ");
+//				}
+//				System.out.println("\n");
+//				i+=docfreq;
+//            }
+//        }
+//        catch(Exception e)
+//        {
+//            System.out.println("reading done\n");
+//        }
+		
+		
+		
 
 		BufferedWriter termWriter = new BufferedWriter(new FileWriter(new File(
 				outputDirname, "term.dict")));
@@ -340,9 +373,9 @@ public class Index {
         IntBuffer ib2 = ch2.map(FileChannel.MapMode.READ_ONLY, 0, ch2.size()).asIntBuffer();
         try
         {	
-            while(i < ch1.size()&&j<ch2.size())
+            while((i*4) < ch1.size()&&(j*4)<ch2.size())
             {	
-            	
+            	System.out.println("Continue");
 				int termid = ib.get(i);
 				int termid2 = ib2.get(j);
 				System.out.println("Compare "+termid+"  and  "+termid2);
@@ -432,12 +465,12 @@ public class Index {
             }
             
             //Add remain data in file
-            while(i < ch1.size()){
+            while(i < (ch1.size()/4)){
             	buf.putInt(ib.get(i));
             	System.out.println("Add Remain from file1: "+ib.get(i));
 				i++;
             }
-            while(j < ch2.size()){
+            while(j < (ch2.size()/4)){
             	buf.putInt(ib2.get(j));
             	System.out.println("Add Remain from file 2: "+ib2.get(j));
 				j++;
@@ -449,7 +482,6 @@ public class Index {
         }
         buf.flip();
         mfchannel.write(buf);
-
 
 	}
 
