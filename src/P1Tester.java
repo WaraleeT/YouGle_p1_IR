@@ -120,23 +120,23 @@ public class P1Tester {
 				e.printStackTrace();
 			}
 			String output = queryService.outputQueryResult(hitDocs);
-//			try {
-//				File file = new File(outputDir, (i+1)+".out");
-//	
-//				// if file doesnt exists, then create it
-//				if (!file.exists()) {
-//					file.createNewFile();
-//				}
-//				
-//				FileWriter fw = new FileWriter(file.getAbsoluteFile());
-//				BufferedWriter bw = new BufferedWriter(fw);
-//			
-//				bw.write(output);
-//				bw.close();
-//			} catch (IOException e) {
-//				
-//				e.printStackTrace();
-//			}
+			try {
+				File file = new File(outputDir, (i+1)+".out");
+	
+				// if file doesnt exists, then create it
+				if (!file.exists()) {
+					file.createNewFile();
+				}
+				
+				FileWriter fw = new FileWriter(file.getAbsoluteFile());
+				BufferedWriter bw = new BufferedWriter(fw);
+			
+				bw.write(output);
+				bw.close();
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
 			
 		}
 		long memoryAfter = Runtime.getRuntime().totalMemory()- Runtime.getRuntime().freeMemory();

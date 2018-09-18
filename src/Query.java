@@ -161,7 +161,7 @@ public class Query {
 		
 		
 		for(String q : querySet){
-			System.out.println("Find "+q+" : ");
+//			System.out.println("Find "+q+" : ");
 			if(termDict.get(q) != null){
 				readPosting(indexFile.getChannel(), termDict.get(q)).getList();
 				result.add(readPosting(indexFile.getChannel(), termDict.get(q)));
@@ -173,10 +173,10 @@ public class Query {
 		
 		//Intersection
 		if(result.size() == 1){ //One term
-			for(int i : result.get(0).getList()){
-				System.out.print(i+", ");
-			}
-			System.out.println();
+//			for(int i : result.get(0).getList()){
+//				System.out.print(i+", ");
+//			}
+//			System.out.println();
 			return result.get(0).getList();
 		}
 		else if(result.size()>1){
@@ -187,10 +187,10 @@ public class Query {
 				temp = intersection(temp, result.get(term).getList());
 				term++;
 			}
-			for(int i : temp){
-				System.out.print(i+", ");
-			}
-			System.out.println();
+//			for(int i : temp){
+//				System.out.print(i+", ");
+//			}
+//			System.out.println();
 			return temp;
 		}
 		else{//Null
@@ -219,8 +219,18 @@ public class Query {
 		 * no results found
 		 * 
          * */
+    	String temp = "";
+    	if(res != null){
+    		for(int i : res){
+    			System.out.println(docDict.get(i));
+    			temp += docDict.get(i);
+    		}
+    	}
+    	else{
+    		temp = "no results found";
+    	}
     	
-    	return null;
+    	return temp;
     }
 	
 	public static void main(String[] args) throws IOException {
