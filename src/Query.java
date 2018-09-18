@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import javax.print.attribute.Size2DSyntax;
 
 public class Query {
 
@@ -28,7 +31,7 @@ public class Query {
 	// Index
 	private  BaseIndex index = null;
 	
-
+	
 	//indicate whether the query service is running or not
 	private boolean running = false;
 	private RandomAccessFile indexFile = null;
@@ -43,10 +46,33 @@ public class Query {
 		/*
 		 * TODO: Your code here
 		 */
+		//Given that fc is an corpus.index
+		Long pos = posDict.get(termId);
+//		System.out.println("term "+termId);
+		int posInt = (int)(pos/4);
+		int freq = freqDict.get(termId);
+		posInt += 2; //Skip doc freq and termId		
+        IntBuffer ib = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()).asIntBuffer();
+        ArrayList<Integer> docID = new ArrayList<>();
+        try
+        {	
+            ib.get(posInt);
+			for(int i = posInt; i < (posInt + freq); i++)
+			{
+				docID.add(ib.get(i));
+//				System.out.print(ib.get(i)+",");
+			}
+            
+        }
+        catch(Exception e)
+        {
+            System.out.println("reading done\n");
+            //System.out.println(i);
+            //System.out.println(fc.size()/4);
+        }
+		PostingList result = new PostingList(termId, docID);
 		
-		
-		
-		return null;
+		return result;
 	}
 	
 	
@@ -106,6 +132,17 @@ public class Query {
 		this.running = true;
 	}
     
+	public List<Integer> intersection(List<Integer> list1, List<Integer> list2){
+		ArrayList<Integer> list = new ArrayList<Integer>();
+
+        for (int t : list1) {
+            if(list2.contains(t)) {
+                list.add(t);
+            }
+        }
+        return list;
+	}
+	
 	public List<Integer> retrieve(String query) throws IOException
 	{	if(!running) 
 		{
@@ -118,9 +155,51 @@ public class Query {
 		 *       return the list of IDs of the documents that match the query
 		 *      
 		 */
-		return null;
+		
+		String [] querySet = query.split(" ");
+		ArrayList <PostingList> result = new ArrayList<>();
+		
+		
+		for(String q : querySet){
+			System.out.println("Find "+q+" : ");
+			if(termDict.get(q) != null){
+				readPosting(indexFile.getChannel(), termDict.get(q)).getList();
+				result.add(readPosting(indexFile.getChannel(), termDict.get(q)));
+			}
+			else{
+				System.out.println("Not found");
+			}
+		}
+		
+		//Intersection
+		if(result.size() == 1){ //One term
+			for(int i : result.get(0).getList()){
+				System.out.print(i+", ");
+			}
+			System.out.println();
+			return result.get(0).getList();
+		}
+		else if(result.size()>1){
+			
+			List <Integer> temp = result.get(0).getList();
+			int term = 1;
+			while(term<result.size()){
+				temp = intersection(temp, result.get(term).getList());
+				term++;
+			}
+			for(int i : temp){
+				System.out.print(i+", ");
+			}
+			System.out.println();
+			return temp;
+		}
+		else{//Null
+			return null;
+		}
+//		return null;
 		
 	}
+	
 	
     String outputQueryResult(List<Integer> res) {
         /*
