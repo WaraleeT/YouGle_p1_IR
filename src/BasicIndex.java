@@ -3,6 +3,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 
+
 public class BasicIndex implements BaseIndex {
 
 	@Override
@@ -11,6 +12,7 @@ public class BasicIndex implements BaseIndex {
 		 * TODO: Your code here
 		 *       Read and return the postings list from the given file.
 		 */			
+		
 		
 		return null;
 	}

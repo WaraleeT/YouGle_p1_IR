@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -98,8 +99,9 @@ public class testanything
         //writeToFileChannel();
         //writeToFileChannel();
         //readFileChannel("./index/small - Copy/corpus.index");
-        readFileChannel("./index/small/corpus.index");
+//        readFileChannel("./index/small/corpus.index");
         //readFileChannel("./index/small/1");
+    	readFileChannel("./output/small/2.out");
     }
 
 }

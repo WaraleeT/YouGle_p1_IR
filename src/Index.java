@@ -24,6 +24,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Waralee Tanaphantaruk		ID 5988044
+ * Pattararat Kiattipadungkul	ID 5988068
+ * Thanakorn Torcheewee			ID 5988148
+ * Section 1
+ */
+
 
 public class Index {
 
@@ -63,14 +70,14 @@ public class Index {
 		 *
 		 */
 		ByteBuffer buf = ByteBuffer.allocate(INT_BYTES*(posting.getList().size()+2));
+		//Write term id of Postlist to ByteBuffer
 		buf.putInt(posting.getTermId());
+		//Write term frequency to ByteBuffer
 		buf.putInt(posting.getList().size());
-		String docBuf = "";
+		//Write all docID to Postlist to ByteBuffer
 		for (int docID : posting.getList()){
 			buf.putInt(docID);
-			docBuf += docID;
 		}
-		System.out.println(posting.getTermId()+","+posting.getList().size()+","+docBuf);
 		buf.flip();
 
 		fc.write(buf);
@@ -89,9 +96,6 @@ public class Index {
 			return null;
 		}
 	}
-
-
-
 
 	/**
 	 * Main method to start the indexing process.
@@ -135,8 +139,9 @@ public class Index {
 
 		try {
 			//Deleting the directory recursively.
+			//Call delete function to delete all children in directory
 			delete(outdir);
-			System.out.println("Directory has been deleted recursively !");
+//			System.out.println("Directory has been deleted recursively !");
 		} catch (IOException e) {
 			System.out.println("Problem occurs when deleting the directory : " + outputDirname);
 			e.printStackTrace();
@@ -156,22 +161,19 @@ public class Index {
 
 		/* For each block */
 		for (File block : dirlist) {
-//			System.out.println(block.getName());
 			File blockFile = new File(outputDirname, block.getName());
-			//System.out.println("Processing block "+block.getName());
 			blockQueue.add(blockFile);
 
 			File blockDir = new File(dataDirname, block.getName());
 			File[] filelist = blockDir.listFiles();
 
-			//Added: Term PostingList
+			//posting is a variable to store all Term PostingList in one block
 			Map<Integer, ArrayList<Integer>> posting = new TreeMap<Integer, ArrayList<Integer>>();
 
 			/* For each file */
 			for (File file : filelist) {
 				++totalFileCount;
 				String fileName = block.getName() + "/" + file.getName();
-//				System.out.println(fileName);
 				// use pre-increment to ensure docID > 0
 				int docId = ++docIdCounter;
 				docDict.put(fileName, docId);
@@ -187,9 +189,9 @@ public class Index {
 						 *       For each term, build up a list of
 						 *       documents in which the term occurs
 						 */
-						/*
-						Oat confirmmmmmmmmmmmmmmmm
-						 */
+						
+						//Check id token is already existed in termDict. If yes, then add docID to existing postinglist
+						//If no, then add assign new termID and add new term to termDict
 						if(termDict.containsKey(token) == false){
 							int termId = ++wordIdCounter;
 							termDict.put(token, termId);
@@ -225,9 +227,9 @@ public class Index {
 			 * TODO: Your code here
 			 *       Write all posting lists for all terms to file (bfc)
 			 */
-//			System.out.println(posting.keySet().toString());
+
 			for(int keyId : posting.keySet()){
-				writePosting(bfc.getChannel(), new PostingList(keyId, posting.get(keyId))); // ok, Oat proved that it works
+				writePosting(bfc.getChannel(), new PostingList(keyId, posting.get(keyId)));
 			}
 			bfc.close();
 		}
@@ -264,7 +266,7 @@ public class Index {
 			 *
 			 */
 			// create an array equal to the length of raf
-			
+			// Call mergeFile method
 			try {
 				mergeFile(bf1, bf2, mf);
 			} catch (Exception e) {
@@ -311,9 +313,7 @@ public class Index {
         {
             System.out.println("reading done\n");
         }
-		
-		
-		
+			
 
 		BufferedWriter termWriter = new BufferedWriter(new FileWriter(new File(
 				outputDirname, "term.dict")));
@@ -339,6 +339,14 @@ public class Index {
 
 		return totalFileCount;
 	}
+	
+	/**
+	 * This method is for merging two block of data and output as one single block
+	 * @param bf1 First block
+	 * @param bf2 Second block
+	 * @param mf output file after merge
+	 * @throws Exception
+	 */
 
 	private static void mergeFile(RandomAccessFile bf1, RandomAccessFile bf2, RandomAccessFile mf) throws Exception{
 		/*
@@ -367,76 +375,60 @@ public class Index {
         IntBuffer ib = ch1.map(FileChannel.MapMode.READ_ONLY, 0, ch1.size()).asIntBuffer();
         IntBuffer ib2 = ch2.map(FileChannel.MapMode.READ_ONLY, 0, ch2.size()).asIntBuffer();
         try
-        {	
+        {	//keep merging until first block or second block end
             while((i*4) < ch1.size()&&(j*4)<ch2.size())
             {	
-            	System.out.println("Continue");
 				int termid = ib.get(i);
 				int termid2 = ib2.get(j);
-				System.out.println("Compare "+termid+"  and  "+termid2);
-//				i++;
-//				j++;
 				int docfreq = ib.get(i+1);
 				int docfreq2 = ib2.get(j+1);
-//				i++;
-//				j++;
-				//combine into one and put into file
+
+				//If termID is equal, combine into one and put into 
 				if(termid == termid2){
 					buf.putInt(termid);		//Add term ID to buffer
-					i++;
-					j++;
-					System.out.println("Add Term ID: "+termid+" from file 1");
-					i++;
-					j++;
+					i+=2;
+					j+=2;
 					int limit1 = i+docfreq;
 					int limit2 = j+docfreq2;
 					int totalFreq = docfreq+docfreq2;
 					buf.putInt(totalFreq);	//Add docFreq to buffer
 					
-					System.out.println("Add Freq: "+totalFreq);
 					//Merge Doc ID 
-					System.out.print("DocID:");
 					while(i<limit1&&j<limit2){
 						if(ib.get(i) < ib2.get(j)){
-							buf.putInt(ib.get(i));	//Add docID
-							System.out.println("Add Doc ID: "+ib.get(i)+" from file 1");
+							buf.putInt(ib.get(i));	//Add docID from block1
 							i++;
 						}
 						else if(ib.get(i) > ib2.get(j)){
-							buf.putInt(ib2.get(j));	//Add docID
-							System.out.println("Add Doc ID: "+ib2.get(j)+" from file 2");
+							buf.putInt(ib2.get(j));	//Add docID from block 2
 							j++;
 						}
 						else{ //equal
 							buf.putInt(ib.get(i));	//Add docID
-							System.out.println("Add Doc ID: "+ib.get(i));
 							i++;
 							j++;
 						}
 					}
 					while(i<limit1){
+						//Add remain docID 
 						buf.putInt(ib.get(i));
-						System.out.println("Add Remain1: "+ib.get(i));
 						i++;
 					}
 					while(j<limit2){
+						//Add remain docID 
 						buf.putInt(ib2.get(j));
-						System.out.println("Add Remain2: "+ib2.get(j));
 						j++;
 					}
 				}
-				else if(termid < termid2){
+				else if(termid < termid2){ //If term ID of the of first block is greater than second block add term of first block
 					buf.putInt(termid);
 					i++;
 					buf.putInt(docfreq);
 					i++;
-					System.out.println("Add Term ID: "+termid+" from file 1");
-					System.out.println("Add Freq: "+docfreq+" from file 1");
 					int len = i+docfreq;
 					while(i<len)
 					{	
 						buf.putInt(ib.get(i));
-						System.out.println("Add Doc ID: "+ib.get(i));
 						i++;
 					}
 					
@@ -446,28 +438,22 @@ public class Index {
 					j++;
 					buf.putInt(docfreq2);
 					j++;
-					System.out.println("Add Term ID: "+termid+" from file 2");
-					System.out.println("Add Freq: "+docfreq2+" from file2");
 					int len = j+docfreq2;
 					while(j<len)
 					{	
 						buf.putInt(ib2.get(j));
-						System.out.println("Add Doc ID: "+ib2.get(j));
 						j++;
 					}
 				}
-				System.out.println("----------------------Round Check: "+i+"  "+j);
             }
             
             //Add remain data in file
             while(i < (ch1.size()/4)){
             	buf.putInt(ib.get(i));
-            	System.out.println("Add Remain from file1: "+ib.get(i));
 				i++;
             }
             while(j < (ch2.size()/4)){
             	buf.putInt(ib2.get(j));
-            	System.out.println("Add Remain from file 2: "+ib2.get(j));
 				j++;
             }
         }
@@ -479,7 +465,11 @@ public class Index {
         mfchannel.write(buf);
 
 	}
-
+	/**
+	 * This function delete children in directory recursively
+	 * @param file
+	 * @throws IOException
+	 */
 	private static void delete(File file) throws IOException {
 
 		for (File childFile : file.listFiles()) {

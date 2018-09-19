@@ -11,12 +11,21 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.print.attribute.Size2DSyntax;
+
+/**
+ * Waralee Tanaphantaruk		ID 5988044
+ * Pattararat Kiattipadungkul	ID 5988068
+ * Thanakorn Torcheewee			ID 5988148
+ * Section 1
+ */
 
 public class Query {
 
@@ -48,7 +57,6 @@ public class Query {
 		 */
 		//Given that fc is an corpus.index
 		Long pos = posDict.get(termId);
-//		System.out.println("term "+termId);
 		int posInt = (int)(pos/4);
 		int freq = freqDict.get(termId);
 		posInt += 2; //Skip doc freq and termId		
@@ -60,15 +68,12 @@ public class Query {
 			for(int i = posInt; i < (posInt + freq); i++)
 			{
 				docID.add(ib.get(i));
-//				System.out.print(ib.get(i)+",");
 			}
             
         }
         catch(Exception e)
         {
             System.out.println("reading done\n");
-            //System.out.println(i);
-            //System.out.println(fc.size()/4);
         }
 		PostingList result = new PostingList(termId, docID);
 		
@@ -131,7 +136,12 @@ public class Query {
 		
 		this.running = true;
 	}
-    
+    /**
+     * This method is for combining two lists of DocID with intersection method
+     * @param list1
+     * @param list2
+     * @return List of intersect docID
+     */
 	public List<Integer> intersection(List<Integer> list1, List<Integer> list2){
 		ArrayList<Integer> list = new ArrayList<Integer>();
 
@@ -161,22 +171,17 @@ public class Query {
 		
 		
 		for(String q : querySet){
-//			System.out.println("Find "+q+" : ");
 			if(termDict.get(q) != null){
 				readPosting(indexFile.getChannel(), termDict.get(q)).getList();
 				result.add(readPosting(indexFile.getChannel(), termDict.get(q)));
 			}
 			else{
-				System.out.println("Not found");
+//				System.out.println("Not found");
 			}
 		}
 		
 		//Intersection
 		if(result.size() == 1){ //One term
-//			for(int i : result.get(0).getList()){
-//				System.out.print(i+", ");
-//			}
-//			System.out.println();
 			return result.get(0).getList();
 		}
 		else if(result.size()>1){
@@ -187,16 +192,11 @@ public class Query {
 				temp = intersection(temp, result.get(term).getList());
 				term++;
 			}
-//			for(int i : temp){
-//				System.out.print(i+", ");
-//			}
-//			System.out.println();
 			return temp;
 		}
 		else{//Null
 			return null;
 		}
-//		return null;
 		
 	}
 	
@@ -220,16 +220,25 @@ public class Query {
 		 * 
          * */
     	String temp = "";
+    	Map<Integer, String> unsortMap = new HashMap<>();
+    	
     	if(res != null){
     		for(int i : res){
-    			System.out.println(docDict.get(i));
-    			temp += docDict.get(i);
+    			unsortMap.put(i, docDict.get(i));
+    			
+    			
     		}
+    		Map<Integer, String> result2 = new LinkedHashMap<>();
+    		//Sort by lexicon order
+            unsortMap.entrySet().stream().sorted(Map.Entry.<Integer, String>comparingByValue())
+                    .forEachOrdered(x -> result2.put(x.getKey(), x.getValue()));
+            for(String i: result2.values()){
+            	temp += i+"\n";
+            }
     	}
     	else{
     		temp = "no results found";
     	}
-    	
     	return temp;
     }
 	
