@@ -19,7 +19,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 
-public class testanything
+public class testout
 {
     //static File file = new File("./index/small/2");
 
@@ -61,28 +61,14 @@ public class testanything
         int i = 0; // index of each number
         int len;
         FileChannel fc = raf.getChannel();
-        IntBuffer ib = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
+        CharBuffer ib = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asCharBuffer();
         System.out.println("Size: "+fc.size());
         try
         {
             while(true)
             {
-                //System.out.println("byte " + countbyte + ": " + ib.get(i));
-                //countbyte+=4;
-               // System.out.println(ib.get(i));
-               // i++;
-				int termid = ib.get(i);
-				i++;
-				int docfreq = ib.get(i);
-				i++;
-				System.out.println("term id = " + termid + " doclen = " + docfreq);
-				System.out.print("posting list: ");
-				for(len = i; len < i+docfreq; len++)
-				{
-					System.out.print(ib.get(len) + " ");
-				}
-				System.out.println("\n");
-				i+=docfreq;
+                System.out.println(ib.get(i++));
+
             }
         }
         catch(Exception e)
@@ -100,8 +86,8 @@ public class testanything
         //writeToFileChannel();
         //readFileChannel("./index/small - Copy/corpus.index");
 //        readFileChannel("./index/small/corpus.index");
-        readFileChannel("./index/small/0+1");
-//    	readFileChannel("./output/small/2.out");
+        //readFileChannel("./index/small/1");
+    	readFileChannel("./output/small/2.out");
     }
 
 }
