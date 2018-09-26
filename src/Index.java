@@ -234,8 +234,8 @@ public class Index {
 			File b1 = blockQueue.removeFirst();
 			File b2 = blockQueue.removeFirst();
 			
-			System.out.println(b1.getName());
-			System.out.println(b2.getName());
+//			System.out.println(b1.getName());
+//			System.out.println(b2.getName());
 			
 			File combfile = new File(outputDirname, b1.getName() + "+" + b2.getName());
 			if (!combfile.createNewFile()) {
@@ -354,14 +354,14 @@ public class Index {
 				int docfreq = indexbuffer.get(i);
 				i++;
 				Pair tempPair = new Pair<Long,Integer>((long) (pos*4), docfreq);
-				System.out.println(termid+"  "+(pos*4)+"  "+docfreq);
+//				System.out.println(termid+"  "+(pos*4)+"  "+docfreq);
 				i+=docfreq;
 				postingDict.put(termid, tempPair);
             }
         }
         catch(Exception e)
         {
-            System.out.println("reading done\n");
+//            System.out.println("reading done\n");
         }
 			
 

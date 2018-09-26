@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.print.attribute.Size2DSyntax;
@@ -168,9 +170,12 @@ public class Query {
 		
 		String [] querySet = query.split(" ");
 		ArrayList <PostingList> result = new ArrayList<>();
-		
-		
-		for(String q : querySet){
+		//Reduce redundant term
+    	Set<String> strset = new HashSet<>();
+    	for(String q: querySet){
+    		strset.add(q);
+    	}
+		for(String q : strset){
 			if(termDict.get(q) != null){
 				readPosting(indexFile.getChannel(), termDict.get(q)).getList();
 				result.add(readPosting(indexFile.getChannel(), termDict.get(q)));
@@ -225,8 +230,6 @@ public class Query {
     	if(res != null){
     		for(int i : res){
     			unsortMap.put(i, docDict.get(i));
-    			
-    			
     		}
     		Map<Integer, String> result2 = new LinkedHashMap<>();
     		//Sort by lexicon order

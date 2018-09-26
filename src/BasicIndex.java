@@ -1,3 +1,6 @@
+/*Waralee Tanaphantaruk 5988044 sec 1
+Pattararat Kiatpadungkul 5988068 sec1
+Thanahorn Torcheewee 5988148 sec1*/
 import java.awt.List;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -25,7 +28,7 @@ public class BasicIndex implements BaseIndex {
 		int count = 0;
 		try {
 			if(fc.read(buf)==-1){
-				System.out.println("End");
+//				System.out.println("End");
 				return null;
 			}
 		} catch (IOException e) {
